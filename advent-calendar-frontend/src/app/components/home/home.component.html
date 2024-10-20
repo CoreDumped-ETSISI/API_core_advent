@@ -1,0 +1,93 @@
+
+<title>Calendario de Adviento</title>
+<link rel="stylesheet" href="home.component.css"> <!-- Asegúrate de enlazar tu CSS -->
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        flex-direction: column;
+    }
+
+    h1 {
+        color: #b30000;
+        margin-bottom: 20px;
+    }
+
+    .calendar {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        max-width: 600px;
+        width: 100%;
+    }
+
+    .day {
+        background-color: #fff;
+        border: 2px solid #b30000;
+        border-radius: 8px;
+        text-align: center;
+        padding: 20px;
+        transition: background-color 0.3s, transform 0.3s;
+        cursor: pointer;
+    }
+
+    .day:hover {
+        background-color: #ffe6e6;
+        transform: scale(1.05);
+    }
+
+    .day.open {
+        background-color: #b30000;
+        color: #fff;
+    }
+
+    @media (max-width: 600px) {
+        .calendar {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+<h1>Calendario de Adviento</h1>
+<div class="calendar">
+    <div class="day" onclick="openDoor(1)">1</div>
+    <div class="day" onclick="openDoor(2)">2</div>
+    <div class="day" onclick="openDoor(3)">3</div>
+    <div class="day" onclick="openDoor(4)">4</div>
+    <div class="day" onclick="openDoor(5)">5</div>
+    <div class="day" onclick="openDoor(6)">6</div>
+    <div class="day" onclick="openDoor(7)">7</div>
+    <div class="day" onclick="openDoor(8)">8</div>
+    <div class="day" onclick="openDoor(9)">9</div>
+    <div class="day" onclick="openDoor(10)">10</div>
+    <div class="day" onclick="openDoor(11)">11</div>
+    <div class="day" onclick="openDoor(12)">12</div>
+    <div class="day" onclick="openDoor(13)">13</div>
+    <div class="day" onclick="openDoor(14)">14</div>
+    <div class="day" onclick="openDoor(15)">15</div>
+    <div class="day" onclick="openDoor(16)">16</div>
+    <div class="day" onclick="openDoor(17)">17</div>
+    <div class="day" onclick="openDoor(18)">18</div>
+    <div class="day" onclick="openDoor(19)">19</div>
+    <div class="day" onclick="openDoor(20)">20</div>
+    <div class="day" onclick="openDoor(21)">21</div>
+    <div class="day" onclick="openDoor(22)">22</div>
+    <div class="day" onclick="openDoor(23)">23</div>
+    <div class="day" onclick="openDoor(24)">24</div>
+</div>
+
+<script>
+    function openDoor(day) {
+        const dayElement = document.querySelector(`.day:nth-child(${day})`);
+        if (!dayElement.classList.contains('open')) {
+            dayElement.classList.add('open');
+            alert(`¡Has abierto el día ${day}!`);
+            // Aquí puedes agregar más lógica para mostrar el contenido del día
+        }
+    }
+</script>

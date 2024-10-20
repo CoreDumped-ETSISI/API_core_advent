@@ -1,0 +1,52 @@
+<!-- src/app/pages/register/register.component.html -->
+<div class="login-container">
+    <h2>Registro</h2>
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+  
+      <div class="form-group">
+        <label for="correo">Correo:</label>
+        <input
+          id="correo"
+          type="email"
+          formControlName="correo"
+          required
+          placeholder="Ingresa tu correo"
+        />
+        <div *ngIf="registerForm.get('correo')?.invalid && registerForm.get('correo')?.touched">
+          <small class="error">El correo es requerido.</small>
+          <small *ngIf="registerForm.get('correo')?.errors?.['email']">Formato de correo inválido.</small>
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <label for="usuario">Nombre de Usuario:</label>
+        <input
+          id="usuario"
+          type="text"
+          formControlName="usuario"
+          required
+          placeholder="Ingresa tu nombre de usuario"
+        />
+        <div *ngIf="registerForm.get('usuario')?.invalid && registerForm.get('usuario')?.touched">
+          <small class="error">El nombre de usuario es requerido.</small>
+        </div>
+      </div>
+  
+      <div class="form-group">
+        <label for="contrasena">Contraseña:</label>
+        <input
+          id="contrasena"
+          type="password"
+          formControlName="contrasena"
+          required
+          placeholder="Ingresa tu contraseña"
+        />
+        <div *ngIf="registerForm.get('contrasena')?.invalid && registerForm.get('contrasena')?.touched">
+          <small class="error">La contraseña es requerida.</small>
+        </div>
+      </div>
+  
+      <button type="submit" [disabled]="registerForm.invalid">Registrar</button>
+    </form>
+  </div>
+  
