@@ -18,3 +18,4 @@ type Respuesta struct {
 func (Respuesta) TableName() string {
 	return "Respuesta"
 }
+

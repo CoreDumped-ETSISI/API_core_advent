@@ -1,44 +1,53 @@
 package routes
 
 import (
-	"advent-calendar-backend/controllers"
-	"advent-calendar-backend/middlewares"
-	"github.com/gin-gonic/gin"
-	"github.com/gin-contrib/cors"
-
+    "advent-calendar-backend/controllers"
+    "advent-calendar-backend/middlewares"
+    "github.com/gin-gonic/gin"
+    "github.com/gin-contrib/cors"
 )
 
 func SetupRouter() *gin.Engine {
-	// GIN_MODE RELLEASE
-	r := gin.Default()
-	r.Use(cors.New(cors.Config{
-		AllowAllOrigins: true, // Permitir todos los orígenes
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
+    r := gin.Default()
+	corsConfig := cors.Config{
+		AllowOrigins: []string{"http://localhost:8080"},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders: []string{"Origin", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
+		ExposeHeaders: []string{"Content-Length"},
 		AllowCredentials: true,
-	}))
-	
+
+	}
+	r.Use(cors.New(corsConfig))
 
 
-    r.GET("/", func(c *gin.Context) {
-        c.JSON(200, gin.H{
-            "message": "Welcome to the Advent Calendar API!",
-        })
-    })
+    r.GET("/", controllers.GetYear)
 
-	// Rutas públicas
+    // Public routes
+    r.POST("/login", controllers.Login)
+    r.POST("/register", controllers.Register)
 
-	r.POST("/login", controllers.Login)
-	r.POST("/register", controllers.Register)
+    // Admin routes
+    adminRoutes := r.Group("/admin")
 
-	// Rutas protegidas
-	protected := r.Group("/api")
-	protected.Use(middlewares.JWTAuthMiddleware())  // Middleware JWT
+	adminRoutes.POST("/", middlewares.AdminAccessMiddleware())
+
+    adminRoutes.Use(middlewares.AdminAccessMiddleware())
+    {
+        adminRoutes.POST("/problemas", controllers.CreateProblema)
+        adminRoutes.PUT("/problemas/:year/:id", controllers.UpdateProblema)
+        adminRoutes.DELETE("/problemas/:year/:id", controllers.DeleteProblema)
+    }
+
+	// // need auth
+	r.Use(middlewares.JWTAuthMiddleware())
 	{
-		protected.GET("/problemas", controllers.GetProblemas)
-		protected.POST("/respuestas", controllers.SubmitRespuesta)
+		r.GET("/:year/:day", controllers.GetProblema)
+		r.POST("/:year/:day", controllers.SubmitRespuesta)
+		r.GET("/:year/", controllers.GetProblemas)
 	}
 
-	return r
+    r.GET("/ranking", controllers.GetRanking)
+    r.GET("/ranking/:year", controllers.GetRanking)
+
+    return r
 }

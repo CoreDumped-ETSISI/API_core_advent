@@ -48,16 +48,4 @@ We expect all contributors to follow our [Code of Conduct](./other/CODE_OF_CONDU
 For a detailed list of changes and versions, check the [CHANGELOG.md](./other/CHANGELOG.md) file.
 
 
-
-├── controllers
-│   ├── problema.go       // Controlador para manejar la lógica de problemas
-│   └── usuario.go        // Controlador para manejar la lógica de usuarios
-├── main.go               // Archivo principal donde se inicia el servidor
-├── middleware
-│   └── auth.go           // Middleware para manejar la autenticación
-├── models
-│   ├── problema.go       // Modelo de datos para problemas
-│   ├── respuesta.go      // Modelo de datos para respuestas
-│   └── usuario.go        // Modelo de datos para usuarios
-└── routes
-    └── routes.go         // Archivo que define las rutas de la API
+go run main.go

@@ -21,6 +21,9 @@ type RegisterInput struct {
 	Contrasena string `json:"Contraseña"`
 }
 
+
+
+
 // Función de registro
 func Register(c *gin.Context) {
 	var input RegisterInput
@@ -55,7 +58,7 @@ func Register(c *gin.Context) {
 		Usuario:    input.Usuario,
 	}
 
-	fmt.Println(input.Contrasena)
+	//fmt.Println(input.Contrasena)
 
 	if err := config.DB.Create(&newUser).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al crear el usuario"})
@@ -64,6 +67,7 @@ func Register(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": newUser})
 }
+
 
 
 
@@ -87,6 +91,7 @@ func Login(c *gin.Context) {
 	}
 
 
+	fmt.Println(user.Contrasena == input.Contrasena)
 	if user.Contrasena != input.Contrasena {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Contraseña incorrecta"})
 		return
@@ -100,3 +105,19 @@ func Login(c *gin.Context) {
 		"token": token,
 	})
 }
+
+// Función para obtener el ranking
+func GetRanking(c *gin.Context) {
+	var ranking []models.Usuario
+	config.DB.Order("tiempo_espera asc").Find(&ranking)
+	c.JSON(http.StatusOK, ranking)
+}
+
+// Función para obtener el ranking por año
+func GetRankingByYear(c *gin.Context) {
+	year := c.Param("year")
+	var ranking []models.Usuario
+	config.DB.Where("year = ?", year).Order("tiempo_espera asc").Find(&ranking)
+	c.JSON(http.StatusOK, ranking)
+}
+
