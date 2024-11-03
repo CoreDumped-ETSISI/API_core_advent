@@ -28,8 +28,6 @@ type RegisterInput struct {
 func Register(c *gin.Context) {
 	var input RegisterInput
 
-	fmt.Println("Register", input)
-	fmt.Println("Datos recibidos para registro:", input.Correo, input.Usuario, input.Contrasena)
 	if err := c.ShouldBindJSON(&input); err != nil {
 		// imprimir error en consola
 		fmt.Println(err)
@@ -69,8 +67,6 @@ func Register(c *gin.Context) {
 }
 
 
-
-
 // Función de inicio de sesión
 func Login(c *gin.Context) {
 	var input LoginInput
@@ -106,18 +102,32 @@ func Login(c *gin.Context) {
 	})
 }
 
-// Función para obtener el ranking
-func GetRanking(c *gin.Context) {
-	var ranking []models.Usuario
-	config.DB.Order("tiempo_espera asc").Find(&ranking)
-	c.JSON(http.StatusOK, ranking)
-}
-
-// Función para obtener el ranking por año
 func GetRankingByYear(c *gin.Context) {
+
 	year := c.Param("year")
-	var ranking []models.Usuario
-	config.DB.Where("year = ?", year).Order("tiempo_espera asc").Find(&ranking)
+	var ranking []struct {
+		UsuarioID            uint   `json:"usuario_id"`
+		Usuario               string `json:"usuario"`
+		Correctas            int    `json:"correctas"`
+		TotalTimeDifference   float64  `json:"total_time_difference"` // Total time difference in seconds
+	}
+
+	// Query to get the ranking
+	err := config.DB.Table("ADVENTCODE.Usuario").
+		Select("ADVENTCODE.Usuario.id as usuario_id, ADVENTCODE.Usuario.usuario, COUNT(ADVENTCODE.Respuesta.id) as correctas, SUM(ADVENTCODE.Respuesta.fecha_envio - ADVENTCODE.Problema.fecha_desbloqueo) as total_time_difference").
+		Joins("LEFT JOIN ADVENTCODE.Respuesta ON ADVENTCODE.Respuesta.usuario_id = ADVENTCODE.Usuario.id AND ADVENTCODE.Respuesta.correcta = 1").
+		Joins("LEFT JOIN ADVENTCODE.Problema ON ADVENTCODE.Respuesta.problema_id = ADVENTCODE.Problema.id").
+		Where("ADVENTCODE.Respuesta.fecha_envio IS NOT NULL AND YEAR(ADVENTCODE.Respuesta.fecha_envio) = ? AND ADVENTCODE.Respuesta.fecha_envio < ADVENTCODE.Problema.fecha_bloqueo", year).
+		Group("ADVENTCODE.Usuario.id").
+		Order("correctas DESC, total_time_difference ASC").
+		Scan(&ranking).Error
+
+	if err != nil {
+		fmt.Println(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching ranking"})
+		return
+	}
+
+
 	c.JSON(http.StatusOK, ranking)
 }
-

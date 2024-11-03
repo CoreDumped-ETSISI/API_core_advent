@@ -10,7 +10,7 @@ import (
 func SetupRouter() *gin.Engine {
     r := gin.Default()
 	corsConfig := cors.Config{
-		AllowOrigins: []string{"http://localhost:8080"},
+		AllowOrigins: []string{"http://localhost:5173"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders: []string{"Origin", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
 		ExposeHeaders: []string{"Content-Length"},
@@ -39,15 +39,14 @@ func SetupRouter() *gin.Engine {
     }
 
 	// // need auth
+    r.GET("/:year/", controllers.GetProblemas)
+    r.GET("/ranking/:year", controllers.GetRankingByYear)
 	r.Use(middlewares.JWTAuthMiddleware())
 	{
 		r.GET("/:year/:day", controllers.GetProblema)
 		r.POST("/:year/:day", controllers.SubmitRespuesta)
-		r.GET("/:year/", controllers.GetProblemas)
 	}
 
-    r.GET("/ranking", controllers.GetRanking)
-    r.GET("/ranking/:year", controllers.GetRanking)
 
     return r
 }

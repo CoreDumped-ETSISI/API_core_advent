@@ -1,9 +1,10 @@
 package utils
 
 import (
-	"time"
-	"github.com/dgrijalva/jwt-go"
 	"advent-calendar-backend/config"
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 func GenerateToken(userID uint) string {
@@ -18,7 +19,16 @@ func GenerateToken(userID uint) string {
 
 func ValidateToken(tokenString string) (*jwt.Token, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		// Ensure the token's signing method is valid
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.NewValidationError("unexpected signing method", jwt.ValidationErrorMalformed)
+		}
 		return config.JWTSecret, nil
 	})
-	return token, err
+
+	if err != nil {
+		return nil, err // Return error if token parsing fails
+	}
+
+	return token, nil // Return the token itself for further claims extraction
 }

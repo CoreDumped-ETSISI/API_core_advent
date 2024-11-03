@@ -6,32 +6,37 @@ import (
 	"advent-calendar-backend/models"
 	"net/http"
 	"time"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"advent-calendar-backend/utils"
+	"github.com/dgrijalva/jwt-go"
 )
 
 
-func getUserIDFromToken(c *gin.Context) (uint, error) {
-	if userID, exists := c.Get("user_id"); exists {
-		return userID.(uint), nil // Type assertion to uint
-	}
-	return 0, fmt.Errorf("user ID not found in context")
+type RespuestaInput struct {
+	SolucionPropuesta string `json:"solucion_propuesta"`
 }
 
+
 func SubmitRespuesta(c *gin.Context) {
+	var input RespuestaInput // Use RespuestaInput for binding
 	var respuesta models.Respuesta
-	if err := c.ShouldBindJSON(&respuesta); err != nil {
+
+	// Bind incoming JSON to the input struct
+	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Get user ID from the token (assumes you have a middleware that handles this)
-	userID, err := getUserIDFromToken(c) // You need to implement this function
-	fmt.Println("userID", userID)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+	// Get the user ID from the token with ValidateToken function
+	token, err := utils.ValidateToken(c.GetHeader("Authorization")[7:])
+	if err != nil || !token.Valid {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		c.Abort() // Stop further processing
 		return
 	}
+
+	claims := token.Claims.(jwt.MapClaims)
+	userID := uint(claims["user_id"].(float64))
 
 	// Get year and day from URL parameters
 	year := c.Param("year")
@@ -44,8 +49,22 @@ func SubmitRespuesta(c *gin.Context) {
 		return
 	}
 
+
+
+    // Check if the user has already submitted a correct answer for this problem
+    var existingRespuesta models.Respuesta
+
+    if err := config.DB.Where("usuario_id = ? AND problema_id = ? AND correcta = true", userID, problema.ID).First(&existingRespuesta).Error; err == nil {
+        c.JSON(http.StatusConflict, gin.H{"error": "Ya has enviado una respuesta correcta para este problema"})
+        return
+    }
+
 	// Set the UserID from the token
 	respuesta.UsuarioID = userID
+	respuesta.FechaEnvio = time.Now()
+	respuesta.SolucionPropuesta = input.SolucionPropuesta // Use input for the solution proposed
+	respuesta.ProblemaID = problema.ID
+	
 
 	// Find the user based on userID
 	var usuario models.Usuario
@@ -90,7 +109,6 @@ func SubmitRespuesta(c *gin.Context) {
 		return
 	}
 }
-
 
 
 
