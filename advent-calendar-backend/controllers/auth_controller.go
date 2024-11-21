@@ -5,23 +5,23 @@ import (
 	"advent-calendar-backend/models"
 	"advent-calendar-backend/utils"
 	"net/http"
-	"github.com/gin-gonic/gin"
+	"net/mail"
+
 	"fmt"
+
+	"github.com/gin-gonic/gin"
 )
 
 type LoginInput struct {
-	Valor    string `json:"Valor"`
+	Valor      string `json:"Valor"`
 	Contrasena string `json:"Contraseña"`
 }
-
 
 type RegisterInput struct {
 	Correo     string `json:"Correo"`
 	Usuario    string `json:"Usuario"`
 	Contrasena string `json:"Contraseña"`
 }
-
-
 
 // Función de registro
 func Register(c *gin.Context) {
@@ -31,6 +31,12 @@ func Register(c *gin.Context) {
 		// imprimir error en consola
 		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Datos inválidos"})
+		return
+	}
+
+	// Validar que el correo sea válido
+	if !isValidEmail(input.Correo) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Correo no válido"})
 		return
 	}
 
@@ -65,6 +71,11 @@ func Register(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": newUser})
 }
 
+// Validar correo con mail.ParseAddress
+func isValidEmail(email string) bool {
+	_, err := mail.ParseAddress(email)
+	return err == nil
+}
 
 // Función de inicio de sesión
 func Login(c *gin.Context) {
@@ -85,7 +96,6 @@ func Login(c *gin.Context) {
 		return
 	}
 
-
 	fmt.Println(user.Contrasena == input.Contrasena)
 	if user.Contrasena != input.Contrasena {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Contraseña incorrecta"})
@@ -105,10 +115,10 @@ func GetRankingByYear(c *gin.Context) {
 
 	year := c.Param("year")
 	var ranking []struct {
-		UsuarioID            uint   `json:"usuario_id"`
-		Usuario               string `json:"usuario"`
-		Correctas            int    `json:"correctas"`
-		TotalTimeDifference   float64  `json:"total_time_difference"` // Total time difference in seconds
+		UsuarioID           uint    `json:"usuario_id"`
+		Usuario             string  `json:"usuario"`
+		Correctas           int     `json:"correctas"`
+		TotalTimeDifference float64 `json:"total_time_difference"` // Total time difference in seconds
 	}
 
 	// Query to get the ranking
@@ -126,7 +136,6 @@ func GetRankingByYear(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching ranking"})
 		return
 	}
-
 
 	c.JSON(http.StatusOK, ranking)
 }
