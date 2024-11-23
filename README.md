@@ -1,38 +1,47 @@
-# sv
+env
+JWT_SECRET=secret
+DB_PASSWORD=secret
+ADMIN_PASSWORD=secret
+DB_PATH=advent-calendar.db
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
 
-## Creating a project
+rutas
+- GET / -> view years as a list [2024, 2023, 2022, 2021]
+- GET /:year -> view a list of days [1, 2, 3]
+- GET /:year/:day -> view a problem:
+    - User needs to be authenticated
+    - Problem is locked until a certain date {"desbloqueado": false, "tiempos_para_desbloquear": "1h 30m 15s"}
+    - If user has not submitted a valid answer yet, return the problem {"problema": "Enunciado", "respuesta_valida": false}
+    - If user has submitted a valid answer, return the problem and the user's answer {"problema": "Enunciado", "respuesta_valida": true, "respuesta_usuario": "Respuesta"}
 
-If you're seeing this, you've probably already done this step. Congrats!
+- POST /:year/:day -> submit an answer to a problem {"solucion_propuesta": "Respuesta"}
 
-```bash
-# create a new project in the current directory
-npx sv create
+- GET /ranking/:year -> view the ranking of users for a year ordered by the number of problems solved and the sum of the time it took 
 
-# create a new project in my-app
-npx sv create my-app
-```
+        {
+            1: {usuario: "Usuario", problemas_resueltos: 3, tiempo_total: "1h 30m 15s"}, 
+            2: {usuario: "Usuario", problemas_resueltos: 2, tiempo_total: "1h 30m 15s"}, 
+            3: {usuario: "Usuario", problemas_resueltos: 1, tiempo_total: "1h 30m 15s"}
+        }
 
-## Developing
+- GET /:year/resueltas -> view the problems solved by a user for a year 
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
-```bash
-npm run dev
+- POST /admin -> login as admin {password}
+- POST /admin/problemas -> create a problem 
+        {
+        "year": 2024,
+        "dia": 1,
+        "titulo": "New Problem",
+        "enunciado": "Problem description",
+        "solucion": "Solution description",
+        "fecha_desbloqueo": "2024-11-19T12:00:00Z",
+        "fecha_bloqueo": "2024-11-20T12:00:00Z"
+        }
+- PUT /admin/problemas/:year/:day -> update a problem
+- DELETE /admin/problemas/:year/:day -> delete a problem
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
 
-## Building
+- POST: /register -> register a user {Correo, Usuario, Constraseña}
+- POST: /login -> login a user {Valor, Contraseña}
 
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
