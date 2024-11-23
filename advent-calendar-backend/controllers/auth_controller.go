@@ -112,7 +112,6 @@ func Login(c *gin.Context) {
 }
 
 func GetRankingByYear(c *gin.Context) {
-
 	year := c.Param("year")
 	var ranking []struct {
 		UsuarioID           uint    `json:"usuario_id"`
@@ -122,12 +121,12 @@ func GetRankingByYear(c *gin.Context) {
 	}
 
 	// Query to get the ranking
-	err := config.DB.Table("ADVENTCODE.Usuario").
-		Select("ADVENTCODE.Usuario.id as usuario_id, ADVENTCODE.Usuario.usuario, COUNT(ADVENTCODE.Respuesta.id) as correctas, SUM(ADVENTCODE.Respuesta.fecha_envio - ADVENTCODE.Problema.fecha_desbloqueo) as total_time_difference").
-		Joins("LEFT JOIN ADVENTCODE.Respuesta ON ADVENTCODE.Respuesta.usuario_id = ADVENTCODE.Usuario.id AND ADVENTCODE.Respuesta.correcta = 1").
-		Joins("LEFT JOIN ADVENTCODE.Problema ON ADVENTCODE.Respuesta.problema_id = ADVENTCODE.Problema.id").
-		Where("ADVENTCODE.Respuesta.fecha_envio IS NOT NULL AND YEAR(ADVENTCODE.Respuesta.fecha_envio) = ? AND ADVENTCODE.Respuesta.fecha_envio < ADVENTCODE.Problema.fecha_bloqueo", year).
-		Group("ADVENTCODE.Usuario.id").
+	err := config.DB.Table("Usuario").
+		Select("Usuario.id as usuario_id, Usuario.usuario, COUNT(Respuesta.id) as correctas, SUM(julianday(Respuesta.fecha_envio) - julianday(Problema.fecha_desbloqueo)) as total_time_difference").
+		Joins("LEFT JOIN Respuesta ON Respuesta.usuario_id = Usuario.id AND Respuesta.correcta = 1").
+		Joins("LEFT JOIN Problema ON Respuesta.problema_id = Problema.id").
+		Where("Respuesta.fecha_envio IS NOT NULL AND strftime('%Y', Respuesta.fecha_envio) = ? AND Respuesta.fecha_envio < Problema.fecha_bloqueo", year).
+		Group("Usuario.id").
 		Order("correctas DESC, total_time_difference ASC").
 		Scan(&ranking).Error
 

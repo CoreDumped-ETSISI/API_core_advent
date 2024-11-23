@@ -4,11 +4,13 @@ package controllers
 import (
 	"advent-calendar-backend/config"
 	"advent-calendar-backend/models"
-	"net/http"
-	"time"
-	"github.com/gin-gonic/gin"
 	"advent-calendar-backend/utils"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 )
 
 
@@ -50,7 +52,6 @@ func SubmitRespuesta(c *gin.Context) {
 	}
 
 
-
     // Check if the user has already submitted a correct answer for this problem
     var existingRespuesta models.Respuesta
 
@@ -82,7 +83,7 @@ func SubmitRespuesta(c *gin.Context) {
 		}
 	}
 
-	// Check if the proposed solution is correct
+
 	if respuesta.SolucionPropuesta == problema.Solucion {
 		// Correct answer, reset waiting time
 		usuario.TiempoEspera = 0
@@ -142,14 +143,73 @@ func GetRespuestasByUsuarioAndProblema(c *gin.Context) {
 }
 
 func GetRespuestasByUsuarioAndCorrecta(c *gin.Context) {
-	usuarioID := c.Param("usuario_id")
-	year := c.Param("year")
+
+	// Get the user ID from the token with ValidateToken function
+	token, err := utils.ValidateToken(c.GetHeader("Authorization")[7:])
+	if err != nil || !token.Valid {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		c.Abort() // Stop further processing
+		return
+	}
+
+	claims := token.Claims.(jwt.MapClaims)
+	usuarioID := uint(claims["user_id"].(float64))
+	// pasamos year a int
+	yearParam := c.Param("year")
+	year, err := strconv.Atoi(yearParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid year format"})
+		return
+	}
+	
 	var respuestas []models.Respuesta
-	config.DB.Where("usuario_id = ? AND correcta = 1 AND year = ?", usuarioID, year).Find(&respuestas)
-	c.JSON(http.StatusOK, respuestas)
+	var esteuser []models.Respuesta
+
+	problemasIDvalidos := []uint{}
+
+	// sacamos de la tabla problemas los problemas que sean del año
+	var problemas []models.Problema
+	config.DB.Where("year = ?", year).Find(&problemas)
+	for _, problema := range problemas {
+		problemasIDvalidos = append(problemasIDvalidos, problema.ID)
+	}
+
+	// sacamos de la tabla respuestas las respuestas que sean correctas y del usuario y los id de los problemas pertenecientes al año
+	config.DB.Where("usuario_id = ? AND correcta = ?", usuarioID, true).Find(&esteuser)
+
+	for _, respuesta := range esteuser {
+		for _, problemaID := range problemasIDvalidos {
+			if respuesta.ProblemaID == problemaID {
+				respuestas = append(respuestas, respuesta)
+			}
+		}
+	}
+
+	// si es nulo devolvemos un mensaje
+	if len(respuestas) == 0 {
+		c.JSON(http.StatusOK, gin.H{"message": "No hay respuestas correctas para el año seleccionado"})
+		return 
+	}
+
+
+	// devolvemos el dia de cada problema y el titulo de dicho problema en json
+	var respuestasJSON []gin.H
+
+	for _, respuesta := range respuestas {
+		var problema models.Problema
+		config.DB.Where("id = ?", respuesta.ProblemaID).First(&problema)
+		respuestasJSON = append(respuestasJSON, gin.H{
+			"dia":    problema.Dia,
+			"titulo": problema.Titulo,
+		})
+	}
+
+
+	c.JSON(http.StatusOK, respuestasJSON)
 }
 
 func GetRespuestasByProblemaAndCorrecta(c *gin.Context) {
+
 	problemaID := c.Param("problema_id")
 	correcta := c.Param("correcta")
 	var respuestas []models.Respuesta
