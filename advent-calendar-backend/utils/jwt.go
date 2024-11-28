@@ -7,9 +7,12 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-func GenerateToken(userID uint) string {
+func GenerateToken(userID uint, username string) string {
+	// get username from the database User model
+	
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": userID,
+		"username":  username,
 		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	})
 
