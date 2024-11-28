@@ -138,3 +138,11 @@ func GetRankingByYear(c *gin.Context) {
 
 	c.JSON(http.StatusOK, ranking)
 }
+
+func GetInfoUsers(c *gin.Context) {
+	// sacamos Username y Correo
+	var users []models.Usuario
+	config.DB.Find(&users)
+	c.JSON(http.StatusOK, users)
+	
+}

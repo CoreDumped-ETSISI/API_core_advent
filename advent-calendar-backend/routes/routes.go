@@ -36,11 +36,12 @@ func SetupRouter() *gin.Engine {
         adminRoutes.POST("/problemas", controllers.CreateProblema)
         adminRoutes.PUT("/problemas/:year/:id", controllers.UpdateProblema)
         adminRoutes.DELETE("/problemas/:year/:id", controllers.DeleteProblema)
+        r.GET("/:year/resueltas", controllers.GetRespuestasByUsuarioAndCorrecta)
+        r.GET("/info_users", controllers.GetInfoUsers)
     }
 
     r.GET("/:year/", controllers.GetProblemas)
     r.GET("/ranking/:year", controllers.GetRankingByYear)
-    r.GET("/:year/resueltas/:usuario", controllers.GetRespuestasByUsuarioAndCorrecta)
 	r.Use(middlewares.JWTAuthMiddleware())
 	{
 		r.GET("/:year/:day", controllers.GetProblema)
