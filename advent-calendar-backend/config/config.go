@@ -30,7 +30,7 @@ func ConnectDatabase() {
 		log.Fatal("DB_PASSWORD or DB_PATH environment variable is required")
 	}
 	// Define the SQLite database file path with encryption
-	dbFilePath := fmt.Sprintf("file:advent_calendar.db?_pragma_key=%s", dbPassword)
+	dbFilePath := fmt.Sprintf("file:%s?_pragma_key=%s", dbPath, dbPassword)
 
 	// Connect to the SQLite database with encryption
 	DB, err = gorm.Open(sqlite.Open(dbFilePath), &gorm.Config{})
