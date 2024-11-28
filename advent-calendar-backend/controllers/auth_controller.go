@@ -103,7 +103,7 @@ func Login(c *gin.Context) {
 	}
 
 	// Generar el token
-	token := utils.GenerateToken(user.ID)
+	token := utils.GenerateToken(user.ID, user.Usuario)
 
 	// Enviar el token como respuesta
 	c.JSON(http.StatusOK, gin.H{
