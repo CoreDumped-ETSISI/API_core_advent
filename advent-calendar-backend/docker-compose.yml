@@ -3,20 +3,14 @@ services:
     build: .
     container_name: go-backend
     ports:
-      - "8000:8000"  # Adjust the port if your backend uses a different one
-    environment:
-      - DB_PATH=/app/database/database.db  # Path to the SQLite DB file inside the container
-      - JWT_SECRET=1234
-      - DB_PASSWORD=1234
-      - ADMIN_PASSWORD=1234
-      - GIN_MODE=release 
+      - "8000:8000" # Adjust the port if your backend uses a different one
     volumes:
-      - app-data:/app/app/database  # Mount the volume to persist only the SQLite DB
+      - advent-data:/app/app/database # Mount the volume to persist only the SQLite DB
     networks:
       - app-network
 
 volumes:
-  app-data: 
+  advent-data:
 networks:
   app-network:
     driver: bridge

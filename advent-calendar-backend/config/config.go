@@ -27,7 +27,7 @@ func ConnectDatabase() {
 	dbPath := os.Getenv("DB_PATH")
 
 	if dbPassword == "" || dbPath == "" {
-		log.Fatal("DB_PASSWORD or DB_PATH environment variable is required")
+		log.Fatal("DB_PASSWORD and DB_PATH environment variable is required")
 	}
 	// Define the SQLite database file path with encryption
 	dbFilePath := fmt.Sprintf("file:%s?_pragma_key=%s", dbPath, dbPassword)
