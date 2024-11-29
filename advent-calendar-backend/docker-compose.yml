@@ -2,15 +2,24 @@ services:
   backend:
     build: .
     container_name: go-backend
+    restart: always
     ports:
-      - "8000:8000" # Adjust the port if your backend uses a different one
+      - "5200:8000" # Adjust the port if your backend uses a different one
     volumes:
       - advent-data:/app/app/database # Mount the volume to persist only the SQLite DB
     networks:
-      - app-network
+      - advent-network
+  frontend:
+    image: 'advent-frontend:1.0.0'
+    container_name: advent-front
+    restart: always
+    ports:
+      - "5100:3000" # Adjust the port if your backend uses a different one
+    networks:
+      - advent-network
 
 volumes:
   advent-data:
 networks:
-  app-network:
+  advent-network:
     driver: bridge
