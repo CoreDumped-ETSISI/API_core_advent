@@ -1,8 +1,11 @@
 env
+```env
 JWT_SECRET=secret
 DB_PASSWORD=secret
 ADMIN_PASSWORD=secret
 DB_PATH=advent-calendar.db
+GIN_MODE=release 
+```
 
 
 rutas
