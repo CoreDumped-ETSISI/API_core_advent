@@ -35,6 +35,7 @@ rutas
 
 
 - POST /admin -> login as admin {password}
+- GET /admin/info_users -> info of all users
 - POST /admin/problemas -> create a problem 
         {
         "year": 2024,
