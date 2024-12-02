@@ -129,13 +129,29 @@ func GetRankingByYear(c *gin.Context) {
 
 	// Query to get the ranking
 	err := config.DB.Table("Usuario").
-		Select("Usuario.id as usuario_id, Usuario.usuario, COUNT(Respuesta.id) as correctas, SUM(julianday(Respuesta.fecha_envio) - julianday(Problema.fecha_desbloqueo)) as total_time_difference").
-		Joins("LEFT JOIN Respuesta ON Respuesta.usuario_id = Usuario.id AND Respuesta.correcta = 1").
-		Joins("LEFT JOIN Problema ON Respuesta.problema_id = Problema.id").
-		Where("Respuesta.fecha_envio IS NOT NULL AND strftime('%Y', Respuesta.fecha_envio) = ? AND Respuesta.fecha_envio < Problema.fecha_bloqueo", year).
-		Group("Usuario.id").
-		Order("correctas DESC, total_time_difference ASC").
-		Scan(&ranking).Error
+    Select(`
+        Usuario.id as usuario_id, 
+        Usuario.usuario, 
+        COUNT(Respuesta.id) as correctas, 
+        SUM(julianday(Respuesta.fecha_envio) - julianday(Problema.fecha_desbloqueo)) as total_time_difference
+    `).
+    Joins(`
+        LEFT JOIN Respuesta 
+        ON Respuesta.usuario_id = Usuario.id AND Respuesta.correcta = 1
+    `).
+    Joins(`
+        LEFT JOIN Problema 
+        ON Respuesta.problema_id = Problema.id
+    `).
+    Where(`
+		Respuesta.fecha_envio IS NOT NULL 
+		AND Problema.year = ?
+		AND julianday(Respuesta.fecha_envio) - julianday(Problema.fecha_desbloqueo) > 0
+		
+    `, year).
+    Group("Usuario.id").
+    Order("correctas DESC, total_time_difference ASC").
+    Scan(&ranking).Error
 
 	if err != nil {
 		fmt.Println(err)

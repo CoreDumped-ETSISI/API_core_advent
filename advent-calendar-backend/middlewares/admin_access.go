@@ -41,7 +41,7 @@ func AdminAccessMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		adminAccess.Lock()
 		defer adminAccess.Unlock()
-
+		fmt.Println("adminAccess", adminAccess.Access)
 		// Check if admin access is still valid
 		if adminAccess.Access.IsAdmin && time.Now().Before(adminAccess.Access.ExpiresAt) {
 			c.Next() // Proceed to the admin route
@@ -65,7 +65,6 @@ func AdminAccessMiddleware() gin.HandlerFunc {
 			Password string `json:"password"`
 		}
 
-		fmt.Println("json", json)
 		if err := c.ShouldBindJSON(&json); err != nil || json.Password == "" {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Password required"})
 			c.Abort()
