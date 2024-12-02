@@ -38,6 +38,7 @@ func SetupRouter() *gin.Engine {
         adminRoutes.DELETE("/problemas/:year/:id", controllers.DeleteProblema)
         r.GET("/:year/resueltas", controllers.GetRespuestasByUsuarioAndCorrecta)
         r.GET("/info_users", controllers.GetInfoUsers)
+        r.GET("/info_problemas", controllers.GetInfoProblemas)
     }
 
     r.GET("/:year/", controllers.GetProblemas)

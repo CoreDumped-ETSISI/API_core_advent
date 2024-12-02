@@ -179,3 +179,9 @@ func DeleteRespuesta(c *gin.Context) {
 	config.DB.Where("id = ?", id).Delete(&models.Respuesta{})
 	c.JSON(http.StatusOK, gin.H{"data": id})
 }
+
+func GetInfoProblemas(c *gin.Context) {
+    var problemas []models.Problema
+    config.DB.Find(&problemas)
+    c.JSON(http.StatusOK, problemas)
+}

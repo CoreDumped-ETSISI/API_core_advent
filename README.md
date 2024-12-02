@@ -40,6 +40,7 @@ rutas
         }
 - PUT /admin/problemas/:year/:day -> update a problem
 - DELETE /admin/problemas/:year/:day -> delete a problem
+- GET /admin/info_problemas -> view all problems
 
 
 - POST: /register -> register a user {Correo, Usuario, Constraseña}
