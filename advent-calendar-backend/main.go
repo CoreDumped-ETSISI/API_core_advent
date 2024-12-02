@@ -21,6 +21,7 @@ func main() {
 
 	// Conectar la base de datos
 	config.ConnectDatabase()
+	gin.SetMode(gin.ReleaseMode)
 
 	// Iniciar el servidor
 	r := routes.SetupRouter()
@@ -32,7 +33,6 @@ func main() {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
-	gin.SetMode(gin.ReleaseMode)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8000" // Puerto por defecto si no se define en las variables de entorno

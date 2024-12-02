@@ -10,6 +10,8 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
+
 )
 
 type LoginInput struct {
@@ -54,12 +56,20 @@ func Register(c *gin.Context) {
 		return
 	}
 
+	// Hash the password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Contrasena), bcrypt.DefaultCost)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error al procesar la contraseña"})
+		return
+	}
+
 	// Crear el nuevo usuario
 	newUser := models.Usuario{
 		Correo:     input.Correo,
-		Contrasena: input.Contrasena,
+		Contrasena: string(hashedPassword),
 		Usuario:    input.Usuario,
 	}
+
 
 	//fmt.Println(input.Contrasena)
 
@@ -90,18 +100,15 @@ func Login(c *gin.Context) {
 	// Verificar si el usuario existe (por correo o nombre de usuario)
 	var user models.Usuario
 	if err := config.DB.Where("correo = ? OR usuario = ?", input.Valor, input.Valor).First(&user).Error; err != nil {
-		fmt.Println(err, "not found")
-
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Correo o usuario no encontrado"})
 		return
 	}
 
-	fmt.Println(user.Contrasena == input.Contrasena)
-	if user.Contrasena != input.Contrasena {
+	// Verificar la contraseña
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Contrasena), []byte(input.Contrasena)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Contraseña incorrecta"})
 		return
 	}
-
 	// Generar el token
 	token := utils.GenerateToken(user.ID, user.Usuario)
 
@@ -140,9 +147,17 @@ func GetRankingByYear(c *gin.Context) {
 }
 
 func GetInfoUsers(c *gin.Context) {
-	// sacamos Username y Correo
-	var users []models.Usuario
-	config.DB.Find(&users)
+	// Retrieve only Usuario and Correo
+	var users []struct {
+		Usuario string `json:"usuario"`
+		Correo  string `json:"correo"`
+	}
+
+	// Use Select to specify the fields you want to retrieve
+	if err := config.DB.Model(&models.Usuario{}).Select("usuario, correo").Scan(&users).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error retrieving users"})
+		return
+	}
+
 	c.JSON(http.StatusOK, users)
-	
 }
