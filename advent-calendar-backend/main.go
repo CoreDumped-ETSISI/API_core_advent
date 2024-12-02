@@ -8,6 +8,9 @@ import (
 
 	"github.com/gin-contrib/cors"
 
+	"time"
+	_ "time/tzdata"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 )
@@ -18,6 +21,11 @@ func main() {
 	if err != nil {
 		log.Println("Error loading .env file, using system environment variables")
 	}
+	loc, err := time.LoadLocation("Europe/Madrid")
+	if err != nil {
+		log.Println("Error loading timezone")
+	}
+	time.Local = loc // -> this is setting the global timezone
 
 	// Conectar la base de datos
 	config.ConnectDatabase()

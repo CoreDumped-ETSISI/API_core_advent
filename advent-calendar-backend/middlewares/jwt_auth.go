@@ -37,9 +37,8 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 
 		// Pasar el token decodificado al contexto
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			userID, idOk := claims["user_id"].(string)
+			userID, idOk := claims["user_id"]
 			username, usernameOk := claims["username"].(string)
-
 			if !idOk || !usernameOk {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "Reclamaciones del token no válidas"})
 				c.Abort()

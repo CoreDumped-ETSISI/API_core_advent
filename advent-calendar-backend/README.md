@@ -43,8 +43,8 @@ rutas
         "titulo": "New Problem",
         "enunciado": "Problem description",
         "solucion": "Solution description",
-        "fecha_desbloqueo": "2024-11-19T12:00:00Z",
-        "fecha_bloqueo": "2024-11-20T12:00:00Z"
+        "fecha_desbloqueo": "2024-11-19T12:00:00+01:00",
+        "fecha_bloqueo": "2024-11-20T12:00:00+01:00"
         }
 - PUT /admin/problemas/:year/:day -> update a problem
 - DELETE /admin/problemas/:year/:day -> delete a problem

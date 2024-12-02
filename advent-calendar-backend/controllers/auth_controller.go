@@ -11,7 +11,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-
 )
 
 type LoginInput struct {
@@ -70,7 +69,6 @@ func Register(c *gin.Context) {
 		Usuario:    input.Usuario,
 	}
 
-
 	//fmt.Println(input.Contrasena)
 
 	if err := config.DB.Create(&newUser).Error; err != nil {
@@ -78,7 +76,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": newUser})
+	c.JSON(http.StatusOK, gin.H{"message": "Usuario creado exitosamente"})
 }
 
 // Validar correo con mail.ParseAddress
@@ -109,6 +107,8 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Contraseña incorrecta"})
 		return
 	}
+	// impirmir en consola
+	fmt.Println("Usuario logueado: ", user.ID, user.Usuario)
 	// Generar el token
 	token := utils.GenerateToken(user.ID, user.Usuario)
 
